@@ -1,0 +1,263 @@
+$medium-blue: #6e72b7
+$hover-grey: rgb(246, 246, 246)
+$border-gray: #dee2e6
+$left-padding: 15px
+$black: rgba(0,0,0,0.6)
+$bg-white: #ffffff
+*
+  // border: 1px solid black
+  box-sizing: border-box
+  color: $black
+  font-family: 'Chivo', sans-serif
+
+body
+  margin: 0px
+  padding: 0px
+  white-space: nowrap
+  transition-duration: 1s
+
+.title_wrap
+  padding: 25px 15px 15px 25px
+  display: flex
+  justify-content: space-between
+  .title
+    font-size: 20px
+  .user_profile_wrap
+    display: flex
+    height: 32px
+    .user_info_wrap
+      text-align: right
+      margin-right: 15px
+      a
+        text-decoration: none
+    .avatar_wrap
+      display: flex
+      justify-content: space-around
+      align-items: center
+      transition-duration: 300ms
+      .avatar
+        height: 32px
+        width: 32px
+        border-radius: 100%
+      .stats_icon
+        border: 2px solid $border-gray
+        border-radius: 100%
+        display: flex
+        justify-content: space-around
+        align-items: center
+        height: 32px
+        width: 32px
+        display: none
+      &:hover
+        .stats_icon
+          display: flex
+        .avatar
+          display: none
+    
+
+.nav_bar_wrap
+  display: flex
+  padding-left: $left-padding
+  border-bottom: 1px solid $border-gray
+  margin-bottom: 5px
+  .nav_item
+    border: 1px solid $bg-white
+    padding: 8px 16px
+    color: $medium-blue
+    cursor: pointer
+    border-top-right-radius: 4px
+    border-top-left-radius: 4px
+    &:hover
+      border: 1px solid rgba($border-gray, 0.7)
+      border-bottom: 1px solid $bg-white
+  .nav_item-active
+    border: 1px solid $border-gray
+    border-bottom: 1px solid $bg-white
+    margin-bottom: -1px
+    &:hover
+      border: 1px solid $border-gray
+      border-bottom: 1px solid $bg-white
+      margin-bottom: -1px
+
+#summary_container
+  display: flex
+  .error_message_container
+    text-align: justify
+    width: 500px
+    white-space: normal
+    .error_title
+      font-weight: bold
+    .sorry_gif
+      width: 150px
+      height: 150px
+
+  .summary_wrap
+    display: none
+    flex-direction: column
+    align-items: center
+    justify-content: space-around
+    width: 100%
+    .metric_row
+      width: 100%
+      display: flex
+      justify-content: space-around
+      align-items: center
+      margin-bottom: 30px
+      .metric_wrap
+        display: flex
+        flex-direction: column
+        justify-content: space-around
+        align-items: center
+        .metric_label
+        .metric_value
+          font-size: 32px
+          font-weight: 700
+          color: darken($medium-blue, 10%)
+  table
+    border-spacing: 1
+    border-collapse: collapse
+    border-radius: 4px
+    text-align: right
+    font-size: 14px
+    td, th
+      padding: 10px 7px
+      font-weight: normal
+    thead tr
+      padding: 10px 7px
+      border-bottom: 1px solid $border-gray
+    thead tr th:first-child
+      border-top-left-radius: 4px
+    thead tr th:last-child
+      border-top-right-radius: 4px
+
+.format_btn_wrap
+  margin-bottom: 15px
+  display: flex
+  .format_btn
+    padding: 10px
+    border: 1px solid rgba(#000, 0.3)
+    border-right: none
+    color: rgba(#000, 0.7)
+    cursor: pointer
+    &:first-child
+      border-top-left-radius: 4px
+      border-bottom-left-radius: 4px
+    &:last-child
+      border-top-right-radius: 4px
+      border-bottom-right-radius: 4px
+      border-right: 1px solid rgba(#000, 0.3)
+    &:hover
+      background-color: $hover-grey
+  .format_btn-select
+    background-color: $medium-blue
+    border-color: $medium-blue !important
+    color: white
+    cursor: default
+    &:hover
+      background-color: $medium-blue
+#views_container
+  display: none
+  #viewsChart
+    display: none
+  .change_time_btn_wrap
+    margin-top: 15px
+    display: flex
+    position: relative
+    .download_btn_wrap
+      position: absolute
+      top: 50%
+      transform: translateY(-50%)
+      left: 150%
+      display: flex
+      justify-content: space-around
+      align-items: center
+    .change_time_btn
+      padding: 10px
+      border: 1px solid rgba(#000, 0.3)
+      color: rgba(#000, 0.7)
+      cursor: pointer
+      border-right: none
+      &:hover
+        background-color: $hover-grey
+    .backward_time_btn
+        border-top-left-radius: 4px
+        border-bottom-left-radius: 4px
+    .forward_time_btn
+      border-top-right-radius: 4px
+      border-bottom-right-radius: 4px
+      border-right: 1px solid rgba(#000, 0.3)
+    .change_time_btn-prohibit
+      opacity: 0.7
+      cursor: default
+      &:hover
+        background-color: white
+.download_loader
+  display: none
+  transition: all 0.7s ease-in-out
+  border: 5px solid #ebebeb
+  border-bottom-color: #26B8BF
+  width: 20px
+  height: 20px
+  border-radius: 100%
+  animation: spin 1s linear infinite
+.views_download_loader
+  display: block
+.views_download
+  display: none
+.feather-download
+  cursor: pointer
+#followers_container
+  display: none
+
+
+.container
+  min-width: 500px
+  padding: 25px
+  align-items: center
+  justify-content: space-around
+  display: flex
+  flex-direction: column
+  font-size: 14px
+  transition-duration: 1s
+  .loader
+    span
+      display: inline-block
+      width: 5px
+      height: 20px
+      background-color: rgb(110, 183, 153)
+      &:nth-child(1)
+        animation: grow 1s ease-in-out infinite
+      &:nth-child(2)
+        animation: grow 1s ease-in-out 0.15s infinite
+      &:nth-child(3)
+        animation: grow 1s ease-in-out 0.3s infinite
+      &:nth-child(4)
+        animation: grow 1s ease-in-out 0.45s infinite
+  
+#stories_container
+  display: none
+.footer
+  padding: 10px 25px 10px 25px
+  border-top: 1px solid $border-gray
+  display: flex
+  justify-content: space-between
+  align-items: center
+  .link_wrap a
+    margin-right: 16px
+    &:last-child
+      margin-right: 0px
+  .version
+    color: rgb(169, 169, 179)
+
+@keyframes grow
+  0%,
+  100%
+    transform: scaleY(1)
+  50%
+    transform: scaleY(1.8)
+
+@keyframes spin
+  0% 
+    transform: rotate(0deg)   
+  100% 
+    transform: rotate(360deg)

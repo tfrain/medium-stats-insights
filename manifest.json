@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Medium Stats Insights",
+  "description": "Get insights into your Medium stats included Summary Stats, Views Stats, Stories Stats, Follower Trend",
+  "version": "1.1.0",
+  "action": {
+    "default_title": "Medium Stats Insights",
+    "default_icon": "icon/icon.png",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icon/icon16.png",
+    "48": "icon/icon48.png",
+    "128": "icon/icon128.png"
+  },
+  "host_permissions": [
+    "https://medium.com/",
+    "https://cdn-images-1.medium.com/"
+  ]
+}
