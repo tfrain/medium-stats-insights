@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Medium Stats Insights",
   "description": "Get insights into your Medium stats included Summary Stats, Views Stats, Stories Stats, Follower Trend",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "action": {
     "default_title": "Medium Stats Insights",
     "default_icon": "icon/icon.png",
