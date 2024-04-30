@@ -43,6 +43,9 @@ Medium Stats Insights is a chrome extension that help writers on Medium get more
 
 - [Chart.js](https://www.chartjs.org/)
 
+## Stargazers over time
+[![Stargazers over time](https://starchart.cc/tfrain/medium-stats-insights.svg?variant=adaptive)](https://starchart.cc/tfrain/medium-stats-insights)
+
 ## Buy Me a Coffee
 
 [![](./img/buymecoffee.jpg)](https://ko-fi.com/programmerscareer)
