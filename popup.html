@@ -20,26 +20,26 @@
 
   <div class="nav_bar_wrap">
     <div class="nav_item nav_item-active" data-name="summary">Summary</div>
-    <div class="nav_item" data-name="views">Views</div>
-    <div class="nav_item" data-name="stories">Stories</div>
+    <div class="nav_item" data-name="analysis">Tops' Analysis</div>
+    <div class="nav_item" data-name="stories">Tops' Stories</div>
     <div class="nav_item" data-name="followers">Followers</div>
   </div>
 
   <div id="summary_container" class="container">
-    <!-- <div id="summary_loader" class="loader">
+    <div id="summary_loader" class="loader">
       <span></span>
       <span></span>
       <span></span>
       <span></span>
-    </div> -->
-    <div id="progress-bar" class="progress-bar">
-      <div id="progress" class="progress"></div>
     </div>
+    <!-- <div id="progress-bar" class="progress-bar">
+      <div id="progress" class="progress"></div>
+    </div> -->
     <div class="summary_wrap">
       <div class="metric_row key_metrics">
         <div class="metric_wrap">
-          <div class="metric_label">Total Views</div>
-          <div class="metric_value total_views"></div>
+          <div class="metric_label">Total Stories</div>
+          <div class="metric_value total_stories"></div>
         </div>
         <div class="metric_wrap" id="follower_count">
           <div class="metric_label">Total Followers</div>
@@ -48,23 +48,45 @@
       </div>
       <div class="metric_row view_metrics">
         <div class="metric_wrap">
-          <div class="metric_label">Last 24 Hours</div>
-          <div class="metric_value day_views"></div>
+          <div class="metric_label">Total Earnings</div>
+          <div class="metric_value total_earnings"></div>
         </div>
         <div class="metric_wrap">
-          <div class="metric_label">Last 7 Days</div>
-          <div class="metric_value week_views"></div>
+          <div class="metric_label">Partner Program Stories</div>
+          <div class="metric_value stories_pp"></div>
         </div>
         <div class="metric_wrap">
-          <div class="metric_label">Last 30 Days</div>
-          <div class="metric_value month_views"></div>
+          <div class="metric_label">Curr Month Earnings</div>
+          <div class="metric_value curr_month_earnings"></div>
         </div>
       </div>
       <div class="summary_table"></div>
     </div>
   </div>
-
-  <div id="views_container" class="container">
+  </div>
+  <div id="analysis_container" class="container">
+    <div class="format_btn_wrap analysis_format_btn_wrap">
+      <div data-analysisFormat="INTERNAL" class="format_btn analysis_format_btn format_btn-select">
+        internal
+      </div>
+      <div data-analysisFormat="DIRECT" class="format_btn analysis_format_btn">Direct</div>
+      <div data-analysisFormat="PLATFORM" class="format_btn analysis_format_btn">Platform</div>
+      <div data-analysisFormat="SEARCH" class="format_btn analysis_format_btn">Search</div>
+      <div data-analysisFormat="SITE" class="format_btn analysis_format_btn">Site</div>
+    </div>
+    <!-- <div id="analysis_loader" class="loader">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div> -->
+    <div id="progress-bar" class="progress-bar">
+      <div id="progress" class="progress"></div>
+    </div>
+    <div class="analysis_wrap"></div>
+    <canvas id="analysisChart"></canvas>
+  </div>
+  <!-- <div id="views_container" class="container">
     <div class="format_btn_wrap time_format_btn_wrap">
       <div data-timeFormat="year" class="format_btn time_format_btn">Year</div>
       <div data-timeFormat="month" class="format_btn time_format_btn">Month</div>
@@ -78,11 +100,11 @@
       <span></span>
       <span></span>
     </div>
-    <canvas id="viewsChart"></canvas>
-    <div class="change_time_btn_wrap">
+    <canvas id="viewsChart"></canvas> -->
+  <!--  <div class="change_time_btn_wrap">
       <div class="change_time_btn backward_time_btn" data-direction="1"> <- </div>
           <div class="change_time_btn forward_time_btn change_time_btn-prohibit" data-direction="-1"> -> </div>
-          <!-- <a class="download_btn_wrap views_download_wrap" title="Export to csv">
+          <a class="download_btn_wrap views_download_wrap" title="Export to csv">
             <div class="download_loader views_download_loader"></div>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
               stroke="rgb(169, 169, 179)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
@@ -91,30 +113,30 @@
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-          </a> -->
-      </div>
-    </div>
-    <div id="stories_container" class="container">
-      <div class="format_btn_wrap stories_format_btn_wrap">
-        <div data-storiesFormat="views" class="format_btn stories_format_btn format_btn-select">
-          Views
-        </div>
-        <div data-storiesFormat="reads" class="format_btn stories_format_btn">Reads</div>
-        <div data-storiesFormat="r/v" class="format_btn stories_format_btn">R/V</div>
-        <div data-storiesFormat="earnings" class="format_btn stories_format_btn">Earnings</div>
-      </div>
-      <!-- <div id="stories_loader" class="loader">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
+          </a> 
       </div> -->
-      <div id="stories-progress-bar" class="stories-progress-bar">
-        <div id="stories-progress" class="stories-progress"></div>
+  <!-- </div>  -->
+  <div id="stories_container" class="container">
+    <div class="format_btn_wrap stories_format_btn_wrap">
+      <div data-storiesFormat="views" class="format_btn stories_format_btn format_btn-select">
+        Views
       </div>
-      <div class="stories_wrap"></div>
-      <canvas id="storiesChart"></canvas>
-      <!-- <a class="download_btn_wrap stories_download_wrap" title="Export to csv">
+      <div data-storiesFormat="reads" class="format_btn stories_format_btn">Reads</div>
+      <div data-storiesFormat="r/v" class="format_btn stories_format_btn">R/V</div>
+      <div data-storiesFormat="earnings" class="format_btn stories_format_btn">Earnings</div>
+    </div>
+    <div id="stories_loader" class="loader">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <!-- <div id="stories-progress-bar" class="stories-progress-bar">
+      <div id="stories-progress" class="stories-progress"></div>
+    </div> -->
+    <div class="stories_wrap"></div>
+    <canvas id="storiesChart"></canvas>
+    <!-- <a class="download_btn_wrap stories_download_wrap" title="Export to csv">
         <div class="download_loader stories_download_loader"></div>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="rgb(169, 169, 179)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
@@ -124,54 +146,55 @@
           <line x1="12" y1="15" x2="12" y2="3"></line>
         </svg>
       </a> -->
+  </div>
+  <div id="followers_container" class="container">
+    <div id="followers_loader" class="loader">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
     </div>
-    <div id="followers_container" class="container">
-      <div id="followers_loader" class="loader">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-      <div class="followers_wrap"></div>
-      <canvas id="followersChart"></canvas>
-    </div>
+    <div class="followers_wrap"></div>
+    <canvas id="followersChart"></canvas>
+  </div>
 
-    <div class="footer">
-      <div class="link_wrap">
-        <a href="https://chromewebstore.google.com/detail/medium-stats-insights/ajgkoiodkljabcgempdllhgkglaiipjb/reviews"
-          target="_blank" rel="noopener" title="Rate this Extension">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="rgb(169, 169, 179)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-            class="feather feather-star">
-            <polygon
-              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-            </polygon>
-          </svg></a>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSd7sOnsSxyzxHPWBtbLlsNjZhw1l3LWYXMcEMYLbw28HdqQfg/viewform"
-          target="_blank" rel="noopener" title="Feedback">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="rgb(169, 169, 179)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-            class="feather feather-send">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg></a>
-        <a href="https://github.com/tfrain/medium-stats-insights" target="_blank" rel="noopener" title="Github">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="rgb(169, 169, 179)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-            class="feather feather-github">
-            <path
-              d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-            </path>
-          </svg></a>
-      </div>
-      <div class="version"></div>
+  <div class="footer">
+    <div class="link_wrap">
+      <a href="https://chromewebstore.google.com/detail/medium-stats-insights/ajgkoiodkljabcgempdllhgkglaiipjb/reviews"
+        target="_blank" rel="noopener" title="Rate this Extension">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="rgb(169, 169, 179)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+          class="feather feather-star">
+          <polygon
+            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+          </polygon>
+        </svg></a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSd7sOnsSxyzxHPWBtbLlsNjZhw1l3LWYXMcEMYLbw28HdqQfg/viewform"
+        target="_blank" rel="noopener" title="Feedback">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="rgb(169, 169, 179)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+          class="feather feather-send">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg></a>
+      <a href="https://github.com/tfrain/medium-stats-insights" target="_blank" rel="noopener" title="Github">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="rgb(169, 169, 179)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+          class="feather feather-github">
+          <path
+            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+          </path>
+        </svg></a>
     </div>
+    <div class="version"></div>
+  </div>
 </body>
 <script src="constant.js"></script>
 <script src="utils.js"></script>
 <script src="query.js"></script>
 <script src="dist/chart.js"></script>
 <script src="popup.js"></script>
+<script src="source.js"></script>
 <script src="story.js"></script>
 <script src="follow.js"></script>
 

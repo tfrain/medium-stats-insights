@@ -56,8 +56,8 @@ let storiesChart;
 
 function renderStoriesChart(labels, data, format) {
     document.getElementById('storiesChart').style.display = 'block';
-    // document.querySelector('#stories_loader').style.display = 'none';
-    document.querySelector('#stories-progress-bar').style.display = 'none';
+    document.querySelector('#stories_loader').style.display = 'none';
+    // document.querySelector('#stories-progress-bar').style.display = 'none';
     if (storiesChart) {
         storiesChart.data.datasets[0].data = data;
         storiesChart.data.datasets[0].label = format;

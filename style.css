@@ -288,7 +288,7 @@ body {
   background-color: #6e72b7;
 }
 
-#views_container {
+/* #views_container {
   display: none;
 }
 
@@ -350,6 +350,10 @@ body {
 
 #views_container .change_time_btn_wrap .change_time_btn-prohibit:hover {
   background-color: white;
+} */
+
+#analysis_container {
+  display: none;
 }
 
 .download_loader {

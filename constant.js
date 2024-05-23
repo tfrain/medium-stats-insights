@@ -6,19 +6,30 @@ const NOW = {
 };
 
 const MEDIUM_GRAPHQL_URL = `https://medium.com/_/graphql`
-const MEDIUM_HOURLY_STATS_URL = (toTime, fromTime) =>
-  `https://medium.com/me/stats/total/${toTime.getTime()}/${fromTime.getTime()}`;
-const MEDIUM_SUMMARY_STATS_URL = `https://medium.com/me/stories/public?format=json`
+
+const MEDIUM_STORY_STATS_URL = `https://medium.com/me/stories/public?format=json`
+const MEDIUM_EARNING_STATS_URL = `https://medium.com/me/partner/dashboard?format=json`
 const MEDIUM_NOTI_STATS_URL = `https://medium.com/_/api/activity?limit=10000`;
 const AVATAR_URL = `https://cdn-images-1.medium.com/v2/resize:fill:64:64/`;
 
-
-const NUMBER_OF_MONTH_FETCHED = 120;
+// const MEDIUM_HOURLY_STATS_URL = (toTime, fromTime) =>
+//   `https://medium.com/me/stats/total/${toTime.getTime()}/${fromTime.getTime()}`;
+// const NUMBER_OF_MONTH_FETCHED = 120;
 const NOTI_EVENT_TYPE = {
   follow: 'users_following_you',
   highlight: 'quote',
   clap: 'post_recommended',
 };
+
+// INTERNAL/DIRECT/PLATFORM/SEARCH/SITE
+const SOURCE_EVENT_TYPE = {
+  internal: 'INTERNAL',
+  direct: 'DIRECT',
+  platform: 'PLATFORM',
+  search: 'SEARCH',
+  site: 'SITE',
+}
+
 const ERROR_MESSAGE = `<div class="error_message_container">
                           <span class="error_title">Something went wrong, please try again later.</span>
                           <br><br>

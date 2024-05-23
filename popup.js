@@ -1,5 +1,4 @@
 'use strict';
-// let articlesMeta;
 document.querySelector('.version').innerHTML = 'v' + chrome.runtime.getManifest().version;
 
 /** Nav Bar */
@@ -7,6 +6,7 @@ document.querySelector('.version').innerHTML = 'v' + chrome.runtime.getManifest(
 const nav_items = document.querySelectorAll('.nav_item');
 nav_items.forEach((el) => el.addEventListener('click', handleChangeTab));
 
+// summary/analysis/story/follower with x_container
 function handleChangeTab() {
   nav_items.forEach((el) => {
     if (el.dataset.name !== this.dataset.name) {
@@ -58,13 +58,15 @@ function renderUserProfile({ name, username, imageId }, followerCount) {
 
 let isReadyToRenderSummaryPage = false;
 let storiesData;
+let tenStorieIds;
+let sourceTableData;
 let loadedArticles = 0;
 let totalArticles;
-let errorLog = { hasSummary: false, hasFollower: false };
+let errorLog = { hasSummary: false, hasFollower: false, hasPost: false, hasEarning: false };
 
 (async () => {
-  // 1. user info
-  const userStatsRawResponse = await fetch(MEDIUM_SUMMARY_STATS_URL);
+  // user info
+  const userStatsRawResponse = await fetch(MEDIUM_STORY_STATS_URL);
   const userStatsTextResponse = await userStatsRawResponse.text();
   const userData = parseMediumResponse(userStatsTextResponse);
   const users =
@@ -73,15 +75,193 @@ let errorLog = { hasSummary: false, hasFollower: false };
   const userMeta = { username, name, imageId, userId };
   totalArticles = (userData && userData.payload && userData.payload.userPostCounts && userData.payload.userPostCounts.approvedOrSubmittedPosts) || {};
 
+  // follower info
   const socialStats =
     (userData && userData.payload && userData.payload.references && userData.payload.references.SocialStats) || {};
-  const usersFollowedByCount = Object.values(socialStats)[0].usersFollowedByCount;
+  const follower = Object.values(socialStats)[0].usersFollowedByCount;
   errorLog.hasFollower = true;
 
-  // 2. story info
+  // post info(draft、published、response)
+  const postData = await handlePostCountsQuery()
+  const postRawData = (postData && postData.viewer && postData.viewer.userPostCounts) || {};
+  const allPosts = postRawData.publishedRootPosts;
+  errorLog.hasPost = true;
+
+  // earning info
+  const earnStatsRawResponse = await fetch(MEDIUM_EARNING_STATS_URL);
+  const earnStatsTextResponse = await earnStatsRawResponse.text();
+  const earningsData = parseMediumResponse(earnStatsTextResponse).payload;
+  let currMonthAmount = earningsData.currentMonthAmount.amount
+  let totalEarnings = currMonthAmount
+  let completeArr = earningsData.completedMonthlyAmounts
+
+  totalEarnings += completeArr.reduce((accumulator, oneMonthly) => {
+    return accumulator + oneMonthly.amount
+  }, 0)
+  currMonthAmount /= 100
+  totalEarnings /= 100
+
+  const earningStories = earningsData.postAmounts.length
+  errorLog.hasEarning = true;
+
+  errorLog.hasSummary = true;
+  errorLog.totalEarnings = totalEarnings;
+
+  // render
+  renderUserProfile(userMeta, follower);
+  renderSummaryData({ follower, allPosts, earningStories, totalEarnings });
+  renderViewsMetrics(totalEarnings, earningStories, currMonthAmount);
+  // story info, wait for request to finish
+  await renderStoryData(username);
+  await renderAnalysisData();
+})().catch((err) => {
+  console.error(errorLog);
+  console.error(err);
+});
+
+function renderSummaryData({
+  follower,
+  allPosts,
+  earningStories,
+  totalEarnings,
+}) {
+  document.querySelector('.total_stories').innerHTML = allPosts.toLocaleString();
+  if (follower && follower !== -1)
+    document.querySelector('.total_followers').innerHTML = follower.toLocaleString();
+  else document.querySelector('#follower_count').remove();
+
+  // $ is dollar
+  const html = `<table>
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>Earnings</th>
+                        <th>PP's Stories</th>
+                        <th>E/S</th>
+                        <th>Followers</th>
+                        <th>E/F</th>
+                      </tr>
+                    <thead>
+                    <tbody>
+                      <tr>
+                        <td>Data</td>
+                        <td>$${numFormater(totalEarnings.toFixed(1))}</td>
+                        <td>${numFormater(earningStories)}</td> 
+                        <td>$${numFormater((totalEarnings / earningStories).toFixed(1))}</td>
+                        <td>${numFormater(follower)}</td>
+                        <td>$${numFormater((totalEarnings / follower).toFixed(1))}</td>
+                      </tr>
+                    </tbody>
+                  <table/>
+                `;
+
+  document.querySelector('.summary_table').innerHTML = html;
+  if (isReadyToRenderSummaryPage) {
+    document.querySelector('#summary_loader').style.display = 'none';
+    document.querySelector('.summary_wrap').style.display = 'flex';
+  } else {
+    isReadyToRenderSummaryPage = true;
+  }
+}
+
+const renderViewsMetrics = (totalEarnings, storiesPP, currMonthAmount) => {
+  document.querySelector('.total_earnings').innerHTML = numFormater(totalEarnings.toFixed(1));
+  document.querySelector('.stories_pp').innerHTML = numFormater(storiesPP).toLocaleString();
+  document.querySelector('.curr_month_earnings').innerHTML = numFormater(currMonthAmount.toFixed(1));
+  if (isReadyToRenderSummaryPage) {
+    document.querySelector('#summary_loader').style.display = 'none';
+    // document.querySelector('#progress-bar').style.display = 'none';
+    document.querySelector('.summary_wrap').style.display = 'flex';
+  } else {
+    isReadyToRenderSummaryPage = true;
+  }
+};
+
+async function renderStoryData(username) {
   const storyData = await handleUserLifetimeStoryStatsPostsQueryFirst(username)
   const storyRawData = (storyData && storyData.user && storyData.user.postsConnection && storyData.user.postsConnection.edges) || {};
+  storiesData = storyRawData.map(item => item.node)
+  tenStorieIds = storiesData.map(node => node.id);
+  renderStoriesHandler('views');
+}
 
+async function renderAnalysisData() {
+  sourceTableData = {
+    INTERNAL: [],
+    DIRECT: [],
+    PLATFORM: [],
+    SEARCH: [],
+    SITE: [],
+  };
+
+  for (const storyId of tenStorieIds) {
+    articleLoaded()
+    const res = await handleStatsPostReferrersQuery(storyId);
+    const referrers = res && res.post && res.post.referrers;
+    referrers.forEach((item) => {
+      const source = item.type;
+      if (sourceTableData[source]) {
+        const existingEntry = sourceTableData[source].find((entry) => entry.sourceIdentifier === item.sourceIdentifier);
+        if (existingEntry) {
+          existingEntry.totalCount += item.totalCount;
+        } else {
+          let entry = { sourceIdentifier: item.sourceIdentifier, totalCount: item.totalCount };
+          sourceTableData[source].push(entry);
+        }
+      } else {
+        console.log('source not found:', source);
+      }
+    });
+  }
+  // console.log(sourceTableData)
+  renderAnalysisHandler(SOURCE_EVENT_TYPE.internal);
+
+  // INTERNAL/DIRECT/PLATFORM/SEARCH/SITE
+  // sourceTableData = {
+  //   INTERNAL: {},
+  //   DIRECT: {},
+  //   PLATFORM: {},
+  //   SEARCH: {},
+  //   SITE: {},
+  // };
+
+  // referrers.forEach((item) => {
+  //   const source = item.type;
+  //   if (sourceTableData[source]) {
+  //     // 查找对应的sourceIdentifier是否存在
+  //     let sourceIdentifierData = sourceTableData[source][item.sourceIdentifier];
+
+  //     // 如果不存在，直接创建一个数组并赋值
+  //     if (!sourceIdentifierData) {
+  //       sourceTableData[source][item.sourceIdentifier] = [item.totalCount];
+  //     } else {
+  //       // 如果已经存在，将值添加到数组中
+  //       sourceIdentifierData.push(item.totalCount);
+  //     }
+  //   } else {
+  //     console.log('source not found:', source);
+  //   }
+  // });
+
+  // todo how to create real graphsql request ?
+}
+
+function updateProgressBar() {
+  let percentage = (loadedArticles / 10) * 100;
+  let storiesProgressBar = document.getElementById('progress');
+  storiesProgressBar.style.width = percentage + '%';
+  storiesProgressBar.innerHTML = percentage + '%';
+}
+
+function articleLoaded() {
+  loadedArticles += 1;
+  updateProgressBar();
+}
+
+// story info
+/*   
+  const storyData = await handleUserLifetimeStoryStatsPostsQueryFirst(username)
+  const storyRawData = (storyData && storyData.user && storyData.user.postsConnection && storyData.user.postsConnection.edges) || {};
   let postsConnection = storyData.user.postsConnection;
   while (
     postsConnection &&
@@ -90,14 +270,14 @@ let errorLog = { hasSummary: false, hasFollower: false };
   ) {
     var endCursorObj = JSON.parse(postsConnection.pageInfo.endCursor);
     const nextStoryRawResponse = await handleUserLifetimeStoryStatsPostsQuery(username, userId, endCursorObj.firstPublishedAt.N, endCursorObj.postId.S);
-
+ 
     const nextStoryRawData = nextStoryRawResponse && nextStoryRawResponse.user && nextStoryRawResponse.user.postsConnection && nextStoryRawResponse.user.postsConnection.edges;
     storyRawData.push(...nextStoryRawData);
-
+ 
     postsConnection = nextStoryRawResponse.user.postsConnection;
     articleLoaded()
   }
-
+ 
   const storyTableData = {
     totalViews: getTotal(storyRawData, 'views'),
     totalReads: getTotal(storyRawData, 'reads'),
@@ -113,79 +293,14 @@ let errorLog = { hasSummary: false, hasFollower: false };
     }, 0);
   }
   console.log(storyTableData)
-
+ 
   let storyRawDatas = storyRawData.slice();
-  storiesData = storyRawDatas.map(item => item.node)
+  storiesData = storyRawDatas.map(item => item.node) */
 
-  errorLog.hasSummary = true;
-  errorLog.name = username;
-  errorLog.view = storyTableData.totalViews;
-  errorLog.stories = storyTableData.totalStories;
-
-  renderUserProfile(userMeta, usersFollowedByCount);
-  renderSummaryData({ usersFollowedByCount, ...storyTableData });
-  renderStoryData();
-
-  function renderStoryData() {
-    renderStoriesHandler('views');
-  }
-
-  function renderSummaryData({
-    usersFollowedByCount,
-    totalViews,
-    totalReads,
-    totalEarnings,
-    totalStories,
-  }) {
-    document.querySelector('.total_views').innerHTML = totalViews.toLocaleString();
-    if (usersFollowedByCount && usersFollowedByCount !== -1)
-      document.querySelector('.total_followers').innerHTML = usersFollowedByCount.toLocaleString();
-    else document.querySelector('#follower_count').remove();
-
-    const html = `<table>
-                      <thead>
-                        <tr>
-                          <th></th>
-                          <th>Fans</th>
-                          <th>Views</th>
-                          <th>Reads</th>
-                          <th>R/V</th>
-                          <th>Stories</th>
-                          <th>Earnings</th>
-                          <th>E/S</th>
-                        </tr>
-                      <thead>
-                      <tbody>
-                        <tr>
-                          <td>Total</td>
-                          <td>${numFormater(usersFollowedByCount)}</td>
-                          <td>${numFormater(totalViews)}</td>
-                          <td>${numFormater(totalReads)}</td>
-                          <td>${toPercentage(totalReads, totalViews)}</td>
-                          <td>${numFormater(totalStories)}</td>
-                          <td>$${numFormater(totalEarnings).toFixed(1)}</td>
-                          <td>$${numFormater((totalEarnings / totalStories).toFixed(1))}</td>
-                        </tr>
-                      </tbody>
-                    <table/>
-                  `;
-
-    document.querySelector('.summary_table').innerHTML = html;
-    if (isReadyToRenderSummaryPage) {
-      document.querySelector('#progress-bar').style.display = 'none';
-      document.querySelector('.summary_wrap').style.display = 'flex';
-    } else {
-      isReadyToRenderSummaryPage = true;
-    }
-  }
-})().catch((err) => {
-  console.error(errorLog);
-  console.error(err);
-});
 
 /** Views Page */
 
-const fetchReadyState = Array(NUMBER_OF_MONTH_FETCHED).fill(false);
+/* const fetchReadyState = Array(NUMBER_OF_MONTH_FETCHED).fill(false);
 const hourViews = [];
 const monthViews = [...Array(NUMBER_OF_MONTH_FETCHED / 12 + 1)].map(() =>
   [...Array(12)].map(() => 0)
@@ -280,7 +395,7 @@ function backwardTimeHandler() {
   renderHandler[timeFormatState](fromTimeState);
 }
 
-displayViewsPage();
+// displayViewsPage();
 const renderHandler = {
   hour: (hourIdx) => {
     let labels = [];
@@ -543,58 +658,4 @@ const renderViewsMetrics = () => {
 const views_download = document.querySelector('.views_download');
 const views_download_loader = document.querySelector('.views_download_loader');
 const views_download_wrap = document.querySelector('.views_download_wrap');
-
-function handleViewsDownload() {
-  exportViewsToCsv();
-  views_download.style.display = 'block';
-  views_download_loader.style.display = 'none';
-}
-
-function exportViewsToCsv() {
-  let csvArray = [['Year', 'Month', 'Day', 'Views']];
-  let curDateViews = 0;
-  let curDateKey = getDateKeyFromEpoch(new Date(hourViews[0]));
-  for (let idx = 0; idx < hourViews.length; idx++) {
-    const [timestamp, views] = hourViews[idx];
-    const tmpDateKey = getDateKeyFromEpoch(new Date(timestamp));
-    if (curDateKey !== tmpDateKey) {
-      csvArray.push([
-        `${curDateKey}`.slice(0, 4),
-        `${curDateKey}`.slice(4, 6),
-        `${curDateKey}`.slice(6, 8),
-        curDateViews,
-      ]);
-      curDateViews = 0;
-      curDateKey = tmpDateKey;
-    }
-    curDateViews += views;
-  }
-  const csvString = getCsvString(csvArray);
-  views_download_wrap.setAttribute(
-    'href',
-    'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString)
-  );
-  views_download_wrap.setAttribute(
-    'download',
-    `Medium-Stats-Counter-Views-${getDateKeyFromEpoch(NOW.epoch)}.csv`
-  );
-  views_download_wrap.addEventListener('click', () => {
-  });
-}
-
-function updateProgressBar() {
-  let percentage = (loadedArticles / totalArticles) * 100;
-
-  let progressBar = document.getElementById('progress');
-  progressBar.style.width = percentage + '%';
-  progressBar.innerHTML = `${loadedArticles}/${totalArticles}`;
-
-  let storiesProgressBar = document.getElementById('stories-progress');
-  storiesProgressBar.style.width = percentage + '%';
-  storiesProgressBar.innerHTML = `${loadedArticles}/${totalArticles}`;
-}
-
-function articleLoaded() {
-  loadedArticles += 10;
-  updateProgressBar();
-}
+*/
