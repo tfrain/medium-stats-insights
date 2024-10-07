@@ -88,29 +88,52 @@ let errorLog = { hasSummary: false, hasFollower: false, hasPost: false, hasEarni
   errorLog.hasPost = true;
 
   // earning info
-  const earnStatsRawResponse = await fetch(MEDIUM_EARNING_STATS_URL);
-  const earnStatsTextResponse = await earnStatsRawResponse.text();
-  const earningsData = parseMediumResponse(earnStatsTextResponse).payload;
-  let currMonthAmount = earningsData.currentMonthAmount.amount
-  let totalEarnings = currMonthAmount
-  let completeArr = earningsData.completedMonthlyAmounts
+  // const earnStatsRawResponse = await fetch(MEDIUM_EARNING_STATS_URL);
+  // const earnStatsTextResponse = await earnStatsRawResponse.text();
+  // const earningsData = parseMediumResponse(earnStatsTextResponse).payload;
+  // let currMonthAmount = earningsData.currentMonthAmount.amount
+  // let totalEarnings = currMonthAmount
+  // let completeArr = earningsData.completedMonthlyAmounts
+  // totalEarnings += completeArr.reduce((accumulator, oneMonthly) => {
+  //   return accumulator + oneMonthly.amount
+  // }, 0)
+  // currMonthAmount /= 100
+  // totalEarnings /= 100
+  // const earningStories = earningsData.postAmounts.length
 
-  totalEarnings += completeArr.reduce((accumulator, oneMonthly) => {
-    return accumulator + oneMonthly.amount
-  }, 0)
-  currMonthAmount /= 100
-  totalEarnings /= 100
+  // transfer info
 
-  const earningStories = earningsData.postAmounts.length
+  const transactionHistoryData = await handleTransactionHistoryQuery(username)
+  const transactionRawData = (transactionHistoryData && transactionHistoryData.userResult && transactionHistoryData.userResult.viewerEdge) || {};
+  const transactionData = (transactionRawData && transactionRawData.earnings && transactionRawData.earnings.transactionHistory) || {};
+  const transactionEdgeArr = (transactionData && transactionData.edges) || {};
+
+  // wwtd next page for payment
+  // while (
+  //   transactionData &&
+  //   transactionData.pageInfo &&
+  //   transactionData.pageInfo.hasNextPage
+  // ) {
+  //   var endCursorObj = JSON.parse(transactionData.pageInfo.endCursor);
+  //   const nextTransactionData = await handleTransactionHistoryQuery(username, userId, endCursorObj.firstPublishedAt.N, endCursorObj.postId.S);
+  //   const nextTransactionRawData = nextTransactionData && nextTransactionData.ususerResulter && nextTransactionData.ususerResulter.viewerEdge && nextTransactionData.ususerResulter.viewerEdge.earnings && nextTransactionData.ususerResulter.viewerEdge.earnings.transactionHistory || {};
+  //   transactionEdgeArr.push(...nextTransactionRawData.edges);
+
+  //   transactionData = nextTransactionRawData;
+  //   articleLoaded()
+  // }
+
+  let totalEarnings = getTotal(transactionEdgeArr, "grossAmount")
+  let taxWithholding = getTotal(transactionEdgeArr, "debits")
+  let totalPaid = getTotal(transactionEdgeArr, "paid")
   errorLog.hasEarning = true;
-
   errorLog.hasSummary = true;
   errorLog.totalEarnings = totalEarnings;
 
   // render
   renderUserProfile(userMeta, follower);
-  renderSummaryData({ follower, allPosts, earningStories, totalEarnings });
-  renderViewsMetrics(totalEarnings, earningStories, currMonthAmount);
+  renderSummaryData({ follower, allPosts, totalPaid, totalEarnings, taxWithholding });
+  renderViewsMetrics(totalEarnings, taxWithholding, totalPaid);
   // story info, wait for request to finish
   await renderStoryData(username);
   await renderAnalysisData();
@@ -122,8 +145,9 @@ let errorLog = { hasSummary: false, hasFollower: false, hasPost: false, hasEarni
 function renderSummaryData({
   follower,
   allPosts,
-  earningStories,
+  totalPaid,
   totalEarnings,
+  taxWithholding,
 }) {
   document.querySelector('.total_stories').innerHTML = allPosts.toLocaleString();
   if (follower && follower !== -1)
@@ -136,8 +160,8 @@ function renderSummaryData({
                       <tr>
                         <th></th>
                         <th>Earnings</th>
-                        <th>PP's Stories</th>
-                        <th>E/S</th>
+                        <th>Paid</th>
+                        <th>Tax</th>
                         <th>Followers</th>
                         <th>E/F</th>
                       </tr>
@@ -146,8 +170,8 @@ function renderSummaryData({
                       <tr>
                         <td>Data</td>
                         <td>$${numFormater(totalEarnings.toFixed(1))}</td>
-                        <td>${numFormater(earningStories)}</td> 
-                        <td>$${numFormater((totalEarnings / earningStories).toFixed(1))}</td>
+                        <td>$${numFormater(totalPaid.toFixed(1))}</td> 
+                        <td>$${numFormater(taxWithholding.toFixed(1))}</td>
                         <td>${numFormater(follower)}</td>
                         <td>$${numFormater((totalEarnings / follower).toFixed(1))}</td>
                       </tr>
@@ -164,10 +188,10 @@ function renderSummaryData({
   }
 }
 
-const renderViewsMetrics = (totalEarnings, storiesPP, currMonthAmount) => {
+const renderViewsMetrics = (totalEarnings, taxWithholding, totalPaid) => {
   document.querySelector('.total_earnings').innerHTML = numFormater(totalEarnings.toFixed(1));
-  document.querySelector('.stories_pp').innerHTML = numFormater(storiesPP).toLocaleString();
-  document.querySelector('.curr_month_earnings').innerHTML = numFormater(currMonthAmount.toFixed(1));
+  document.querySelector('.tax_with_holding').innerHTML = numFormater(taxWithholding).toLocaleString();
+  document.querySelector('.total_paid').innerHTML = numFormater(totalPaid.toFixed(1));
   if (isReadyToRenderSummaryPage) {
     document.querySelector('#summary_loader').style.display = 'none';
     // document.querySelector('#progress-bar').style.display = 'none';
@@ -244,6 +268,17 @@ async function renderAnalysisData() {
   // });
 
   // todo how to create real graphsql request ?
+}
+
+function getTotal(arr, action) {
+  return arr.reduce((sum, el) => {
+    if (action == 'grossAmount') {
+      return sum + el.node.grossAmount.units + el.node.grossAmount.nanos / 1e9;
+    } else if (action == 'debits') {
+      return sum + el.node.debits[0].amount.units + el.node.debits[0].amount.nanos / 1e9;
+    }
+    return sum + el.node.amount.units + el.node.amount.nanos / 1e9;
+  }, 0);
 }
 
 function updateProgressBar() {
